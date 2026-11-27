@@ -1,0 +1,31 @@
+# --- Python / tooling ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- Model weights (~8 GB) - recreate with: python scripts/fetch_models.py ---
+models/
+
+# --- Scans and results ---
+# Personal family photos and large TIFFs (~1.5 GB) - keep them out of the repo
+test_data/
+# Pipeline output folders (masters, restored images, paint files, work files)
+out_*/
+
+# Interrupted atomic writes
+*.part
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store

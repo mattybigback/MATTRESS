@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mattress"
+version = "0.1.0"
+description = "Offline batch photo-scan splitter and light restorer"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "opencv-python>=4.10",
+    "tifffile>=2024.8",
+    "Pillow>=10.4",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+    "spandrel>=0.4",
+    "spandrel_extra_arches>=0.2",
+    "open_clip_torch>=2.26",
+    "imagecodecs>=2024.6",
+    "diffusers>=0.30",
+    "transformers>=4.45",
+    "accelerate>=0.30",
+]
+# torch / torchvision are installed separately from the CUDA wheel index:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+[project.optional-dependencies]
+sam = ["transformers>=4.56"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+mattress = "mattress.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["mattress*"]
+
+[tool.setuptools.package-data]
+mattress = ["*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
