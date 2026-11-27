@@ -4,13 +4,15 @@ from __future__ import annotations
 import csv
 import html
 import json
+import logging
 import shutil
 from pathlib import Path
 
 import cv2
-import numpy as np
 
-from .io import read_image, to_u8
+from .io import read_image, remove_tree, to_u8
+
+log = logging.getLogger(__name__)
 
 FLAG_TEXT = {
     "low_detection_confidence": "Crop may be wrong (low detection confidence)",
@@ -56,8 +58,9 @@ def write_reports(out: Path, rows: list[dict], pages_dir: Path, cfg) -> None:
 
     # ---------------- review sheet
     rev = out / "_review"
-    if rev.exists():
-        shutil.rmtree(rev)
+    if not remove_tree(rev):
+        # OneDrive / Explorer holding the folder: carry on, leftovers get overwritten.
+        log.warning("could not fully clear %s (in use by another program?) - continuing", rev)
     flagged = [st for st in rows if st.get("flags")]
     repaired = [st for st in rows if any(a.startswith("repair") for a in st.get("applied", []))]
     page_flags = []
@@ -67,7 +70,7 @@ def write_reports(out: Path, rows: list[dict], pages_dir: Path, cfg) -> None:
             page_flags.append((info, pj.with_name(pj.stem + "_detect.jpg")))
     if not flagged and not page_flags and not repaired:
         return
-    rev.mkdir(parents=True)
+    rev.mkdir(parents=True, exist_ok=True)
     px = int(cfg.review.thumb_px)
     parts = [
         "<!doctype html><meta charset=utf-8><title>MATTRESS review</title>",

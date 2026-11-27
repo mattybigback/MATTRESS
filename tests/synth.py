@@ -8,7 +8,7 @@ import numpy as np
 def fake_photo(h: int, w: int, rng: np.random.Generator, colour: bool = True,
                white_border: int = 0) -> np.ndarray:
     """uint16 RGB photo-like content: gradients, blobs, lines and grain."""
-    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)  # pylint: disable=no-member
     base = np.zeros((h, w, 3), np.float32)
     for c in range(3):
         a, b = rng.uniform(-1, 1, 2)

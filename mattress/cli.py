@@ -4,11 +4,11 @@ from __future__ import annotations
 import argparse
 import logging
 import os
-import shutil
 import sys
 from pathlib import Path
 
 from .config import load_config
+from .io import remove_tree
 from .pipeline import STAGES, Run
 
 
@@ -49,8 +49,8 @@ def main(argv: list[str] | None = None) -> int:
         ap.error(f"unknown stage(s): {bad}")
     if not a.input.is_dir():
         ap.error(f"input folder not found: {a.input}")
-    if a.force and (a.output / "_work").exists():
-        shutil.rmtree(a.output / "_work")
+    if a.force and not remove_tree(a.output / "_work"):
+        ap.error(f"could not delete {a.output / '_work'} - close any program using it and retry")
 
     run = Run(cfg, a.input, a.output, blank=a.blank, keep_work=a.keep_work)
     if a.redo_from:

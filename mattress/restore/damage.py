@@ -23,7 +23,7 @@ def _specks(weak: np.ndarray, strong: np.ndarray, k: int, max_area: float) -> tu
     for j, i in enumerate(seeds):
         if not ok[j]:
             continue
-        x, y, w, h, area = stats[i]
+        x, y, w, h, _ = stats[i]
         cx, cy = x + w // 2, y + h // 2
         x0, x1 = max(0, cx - win // 2), min(W, cx + win // 2 + 1)
         y0, y1 = max(0, cy - win // 2), min(H, cy + win // 2 + 1)

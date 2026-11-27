@@ -27,9 +27,9 @@ class _HttpFile(io.RawIOBase):
     2 GB release archive without downloading the rest."""
 
     def __init__(self, url: str):
-        r = urllib.request.urlopen(urllib.request.Request(url, method="HEAD",
-                                                          headers={"User-Agent": "mattress"}))
-        self.url, self.size, self.pos = r.geturl(), int(r.headers["Content-Length"]), 0
+        head = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "mattress"})
+        with urllib.request.urlopen(head, timeout=60) as r:
+            self.url, self.size, self.pos = r.geturl(), int(r.headers["Content-Length"]), 0
 
     def seekable(self):
         return True
@@ -50,7 +50,8 @@ class _HttpFile(io.RawIOBase):
         end = min(self.size, self.pos + len(b)) - 1
         req = urllib.request.Request(self.url, headers={"Range": f"bytes={self.pos}-{end}",
                                                         "User-Agent": "mattress"})
-        d = urllib.request.urlopen(req, timeout=60).read()
+        with urllib.request.urlopen(req, timeout=60) as r:
+            d = r.read()
         b[: len(d)] = d
         self.pos += len(d)
         return len(d)
@@ -66,8 +67,7 @@ def download(models_dir: Path) -> Path:
     if dest.exists():
         return dest
     tmp = models_dir / "bopb_detection_checkpoint.part"
-    z = zipfile.ZipFile(io.BufferedReader(_HttpFile(ZIP_URL), buffer_size=8 << 20))
-    with z.open(MEMBER) as src, open(tmp, "wb") as dst:
+    with zipfile.ZipFile(io.BufferedReader(_HttpFile(ZIP_URL), buffer_size=8 << 20)) as z,             z.open(MEMBER) as src, open(tmp, "wb") as dst:
         shutil.copyfileobj(src, dst, 8 << 20)
     ck = torch.load(tmp, map_location="cpu", weights_only=True)  # tensors only - no pickled code
     sd = {k.replace("module.", ""): v.contiguous() for k, v in ck["model_state"].items()}

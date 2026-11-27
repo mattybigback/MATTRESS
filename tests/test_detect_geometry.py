@@ -26,7 +26,7 @@ def _match(dets, truth):
     pairs = []
     for t in truth:
         tc = t["quad"].mean(0)
-        d = min(dets, key=lambda d: np.linalg.norm(np.array(d.quad).mean(0) - tc))
+        d = min(dets, key=lambda d, tc=tc: np.linalg.norm(np.array(d.quad).mean(0) - tc))
         pairs.append((d, t))
     return pairs
 
@@ -35,7 +35,7 @@ def _match(dets, truth):
 def test_detect_and_deskew(seed, white_border):
     rng = np.random.default_rng(seed)
     page, truth = make_page(rng, dpi=300, n=3, white_border=white_border)
-    dets, info = detect_prints(page, 300, CFG)
+    dets, _ = detect_prints(page, 300, CFG)
     assert len(dets) == len(truth), f"found {len(dets)} expected {len(truth)}"
     for d, t in _match(dets, truth):
         iou = _poly_iou(d.quad, t["quad"], page.shape[:2])
@@ -73,7 +73,7 @@ def test_damage_mask_finds_specks():
     rng = np.random.default_rng(9)
     img = to_float(fake_photo(1800, 2400, rng))
     dirty, truth = add_dust(img, rng)
-    mask, stats = damage_mask(dirty, 600, CFG.damage)
+    mask, _ = damage_mask(dirty, 600, CFG.damage)
     hit = (mask[truth > 0] > 0).mean()
     assert hit > 0.8, hit
     near = cv2.dilate(truth, np.ones((15, 15), np.uint8))

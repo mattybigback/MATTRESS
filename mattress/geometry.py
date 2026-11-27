@@ -144,7 +144,7 @@ def refine_quad(page: np.ndarray, quad, lid_rgb, dpi: float, search_in: float = 
             runs = [r for r in runs if r[0] <= mid + tol]
             if not runs:
                 continue                       # no lid near this point (touching print)
-            a_, b_ = min(runs, key=lambda r: 0 if r[0] <= mid < r[1] else min(abs(r[0] - mid), abs(r[1] - mid)))
+            _, b_ = min(runs, key=lambda r, mid=mid: 0 if r[0] <= mid < r[1] else min(abs(r[0] - mid), abs(r[1] - mid)))
             if b_ >= len(ll) - 1:
                 continue                       # lid all the way in: not this print's edge
             edge_pts.append(base[j] + offs[b_] * n)  # first non-lid pixel inside the run

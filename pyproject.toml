@@ -40,3 +40,33 @@ mattress = ["*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.pylint.main]
+# vendored third-party network code: not ours to restyle
+ignore-paths = ["mattress/restore/third_party/.*"]
+
+[tool.pylint.typecheck]
+# OpenCV is a compiled extension pylint can't introspect -> endless false "no-member" errors
+generated-members = ["cv2.*"]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint."messages control"]
+disable = [
+    # image-processing code uses short maths names (H, W, A, B, Lh...) on purpose
+    "invalid-name",
+    # heavy libs (torch, diffusers, transformers) are imported lazily on purpose
+    "import-outside-toplevel",
+    # pipeline/vision functions are naturally long with many locals/params
+    "too-many-locals",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "too-many-statements",
+    "too-many-branches",
+    "too-many-instance-attributes",
+    "too-few-public-methods",
+    # docstrings are written where they add value, not on every function
+    "missing-function-docstring",
+    "missing-class-docstring",
+]

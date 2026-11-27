@@ -14,7 +14,14 @@ class FaceDetector:
     def __init__(self, models_dir: Path, score: float = 0.8):
         self.path = str(weight_path("yunet", models_dir))
         self.score = score
-        self.det = cv2.FaceDetectorYN.create(self.path, "", (320, 320), score, 0.3, 500)
+        # OpenCV 5's new DNN engine warns "Targets are not supported by the new graph engine"
+        # because create() always sets the (default CPU) target - harmless, so mute it here only
+        lvl = cv2.utils.logging.getLogLevel()
+        cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+        try:
+            self.det = cv2.FaceDetectorYN.create(self.path, "", (320, 320), score, 0.3, 500)
+        finally:
+            cv2.utils.logging.setLogLevel(lvl)
 
     def detect(self, img: np.ndarray, work_long: int = 1600) -> np.ndarray:
         """Return Nx15 array in img pixel coords: x,y,w,h, 5 landmarks (x,y), score.

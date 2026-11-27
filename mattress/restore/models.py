@@ -90,7 +90,7 @@ def download(key: str, models_dir: Path) -> Path:
                 raise IOError(f"download too small ({tmp.stat().st_size} bytes)")
             tmp.replace(dest)
             break
-        except Exception as e:  # try next mirror
+        except Exception as e:  # pylint: disable=broad-exception-caught  # try next mirror
             last_err = e
             tmp.unlink(missing_ok=True)
     else:

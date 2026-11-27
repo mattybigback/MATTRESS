@@ -133,7 +133,7 @@ _SEG = None
 
 def person_mask(x: np.ndarray, models_dir: Path) -> np.ndarray:
     """uint8 {0,1} mask of people (DeepLabV3 person class), at x's resolution. CPU."""
-    global _SEG
+    global _SEG  # pylint: disable=global-statement  # lazy model cache
     os.environ.setdefault("TORCH_HOME", str((Path(models_dir) / "torch").resolve()))
     from torchvision.models.segmentation import (DeepLabV3_MobileNet_V3_Large_Weights,
                                                  deeplabv3_mobilenet_v3_large)

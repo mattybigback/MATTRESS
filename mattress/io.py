@@ -140,6 +140,44 @@ def write_tiff(path: str | Path, arr: np.ndarray, dpi: float | None, icc: bytes 
     _replace(tmp, path)
 
 
+def remove_tree(path: str | Path, tries: int = 5) -> bool:
+    """Delete a folder tree, tolerating Windows/OneDrive briefly holding handles.
+
+    shutil.rmtree aborts on the first PermissionError, which OneDrive sync, Explorer or
+    antivirus routinely cause on a just-emptied folder. Here each entry is retried (after
+    clearing read-only) and failures are skipped; returns True only if the tree is gone.
+    """
+    import os
+    import stat
+    import time
+
+    path = Path(path)
+    for i in range(tries):
+        if not path.exists():
+            return True
+        for root, dirs, files in os.walk(path, topdown=False):
+            for name in files:
+                p = os.path.join(root, name)
+                try:
+                    os.chmod(p, stat.S_IWRITE)
+                    os.unlink(p)
+                except OSError:
+                    pass
+            for name in dirs:
+                try:
+                    os.rmdir(os.path.join(root, name))
+                except OSError:
+                    pass
+        try:
+            path.rmdir()
+        except OSError:
+            pass
+        if not path.exists():
+            return True
+        time.sleep(0.5 * (i + 1))
+    return False
+
+
 def _replace(tmp: Path, path: Path, tries: int = 5) -> None:
     """Atomic replace; Windows refuses while another program (a viewer) has the file open."""
     import time
@@ -148,10 +186,10 @@ def _replace(tmp: Path, path: Path, tries: int = 5) -> None:
         try:
             tmp.replace(path)
             return
-        except PermissionError:
+        except PermissionError as exc:
             if i == tries - 1:
                 tmp.unlink(missing_ok=True)
-                raise PermissionError(f"cannot overwrite {path} - is it open in another program?")
+                raise PermissionError(f"cannot overwrite {path} - is it open in another program?") from exc
             time.sleep(1.0)
 
 

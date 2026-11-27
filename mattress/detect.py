@@ -76,7 +76,7 @@ def _fit_lid_surface(small: np.ndarray, lid: np.ndarray) -> np.ndarray:
         y = y / h - 0.5
         return np.stack([np.ones_like(x), x, y, x * x, y * y, x * y], -1)
     A = basis(xs.astype(np.float32), ys.astype(np.float32))
-    gy, gx = np.mgrid[0:h, 0:w].astype(np.float32)
+    gy, gx = np.mgrid[0:h, 0:w].astype(np.float32)  # pylint: disable=no-member  # mgrid returns ndarray
     B = basis(gx, gy)
     out = np.empty(small.shape, np.float32)
     for c in range(small.shape[2]):
@@ -258,7 +258,7 @@ def _xy_cut(blob: np.ndarray, lidlike: np.ndarray, min_side: float, depth: int =
                                             ef[max(0, j - 3): j + 10].max(initial=0)) >= 0.35
                 if bounded and mid >= min_side and n - mid >= min_side:
                     score = float(frac[i:j].max())
-                    if best is None or score > best[0]:
+                    if best is None or score > best[0]:  # pylint: disable=unsubscriptable-object
                         best = (score, axis, mid)
                 i = j
             else:
@@ -342,7 +342,7 @@ def _find_seam(small: np.ndarray, blob: np.ndarray, min_side: float):
             if d < 25:
                 continue
             score = cc + d / 100.0
-            if best is None or score > best[0]:
+            if best is None or score > best[0]:  # pylint: disable=unsubscriptable-object
                 best = (score, axis, k)
     if best is None:
         return None
@@ -571,7 +571,7 @@ def detect_prints(page: np.ndarray, page_dpi: float, cfg, blank: np.ndarray | No
         if area < min_side * min_side:
             continue
         rect = _normalise_rect(cv2.minAreaRect(c))
-        (cx, cy), (rw, rh), ang = rect
+        rw, rh = rect[1]
         if min(rw, rh) < min_side:
             continue
         # a region that is mostly bare lid inside is a shadow / lid-gradient patch, not a print
@@ -588,7 +588,7 @@ def detect_prints(page: np.ndarray, page_dpi: float, cfg, blank: np.ndarray | No
         if x <= 1 or y <= 1 or x + bw >= sw - 1 or y + bh >= sh - 1:
             notes.append("touches_page_edge")
         rect = _snap_rect(rect, edge_norm, int(dc.edge_snap_px))
-        (cx, cy), (rw, rh), ang = rect
+        _, (rw, rh), ang = rect
 
         # confidence: rectangularity + edge support along the fitted outline + aspect sanity
         box = cv2.boxPoints(rect).astype(np.int32)

@@ -27,7 +27,7 @@ from . import __version__
 from .colorclass import classify, to_neutral_gray
 from .detect import debug_overlay, detect_prints
 from .geometry import crop_print
-from .io import _replace, ImageMeta, list_images, read_image, to_float, to_u16, to_rgb, write_jpeg, write_npy, write_tiff
+from .io import _replace, list_images, read_image, to_float, to_u16, to_rgb, write_jpeg, write_npy, write_tiff
 
 log = logging.getLogger("mattress")
 
@@ -432,7 +432,6 @@ class Run:
                 from .restore.models import free_gpu
                 model = None
                 free_gpu()
-                import torch
                 if torch.cuda.is_available():
                     free, total = torch.cuda.mem_get_info()
                     log.info("%s: peak VRAM used by models %.2f GB (GPU now %.2f of %.1f GB used)",
